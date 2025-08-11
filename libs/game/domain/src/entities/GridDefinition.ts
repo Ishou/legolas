@@ -1,6 +1,5 @@
 import { Definition } from './Definition.js';
 import { Coordinates } from '../values/Coordinates.js';
-import { b } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 
 export enum Orientation {
   BOTTOM,
@@ -12,13 +11,10 @@ export enum Orientation {
 export class GridDefinition {
   constructor(
     public readonly definition: Definition,
-    public readonly coordinates: Coordinates,
     public readonly orientation: Orientation
-  ) {
-    // TODO naming foireux
-  }
+  ) {}
 
-  public coordinateForIndex(i: number) {
+  public coordinateForIndex(coordinates: Coordinates, i: number) {
     let xDelta = 0;
     let xFactor = 0;
     let yDelta = 0;
@@ -28,7 +24,6 @@ export class GridDefinition {
       case Orientation.BOTTOM_RIGHT:
         xFactor = 1;
         yDelta = 1;
-        yFactor = 1;
         break;
 
       case Orientation.BOTTOM:
@@ -47,8 +42,8 @@ export class GridDefinition {
         break;
     }
 
-    const x = this.coordinates.x + xDelta + xFactor * i;
-    const y = this.coordinates.y + yDelta + yFactor * i;
+    const x = coordinates.x + xDelta + xFactor * i;
+    const y = coordinates.y + yDelta + yFactor * i;
 
     return Coordinates.create(x, y);
   }

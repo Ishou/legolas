@@ -9,7 +9,7 @@ export class Definition {
   constructor(public readonly text: string, public readonly answer: string) {
     if (
       (this.text = text.trim()) === '' ||
-      (this.answer = answer.trim()) === ''
+      (this.answer = answer.trim().toUpperCase()) === ''
     ) {
       throw new Error(
         'The Definition text and answer must a non-empty string.'

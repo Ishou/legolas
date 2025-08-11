@@ -1,7 +1,8 @@
 import { nanoid } from 'nanoid';
 import { Coordinates } from '../values/Coordinates.js';
-import { GridDefinition } from './GridDefinition.js';
 import { Slot } from './Slot.js';
+import { Case } from './Case.js';
+import { GridDefinitionsSlot } from './GridDefinitionsSlot.js';
 
 declare const gridId: unique symbol;
 export type GridId = string & { [gridId]: true };
@@ -12,38 +13,63 @@ export class Grid {
   constructor(
     public readonly width: number,
     public readonly height: number,
-    public readonly definitions: GridDefinition[]
+    public readonly definitions: GridDefinitionsSlot[]
   ) {
-    const grid: (Slot | undefined)[][] = new Array(this.width)
+    const grid: (Case | undefined)[][] = new Array(this.width)
       .fill(0)
-      .map(() => new Array(this.height).fill(undefined));
+      .map(() => new Array(this.height).fill(0).map(() => undefined));
 
-    definitions.forEach((definition) => {
-      definition.definition.answer.split('').forEach((letter, i) => {
-        const letterCoordinates = definition.coordinateForIndex(i);
-        const gridLetter = grid[letterCoordinates.x][letterCoordinates.y];
-        const slotLetter = Slot.create(letter);
+    definitions.forEach((definitionSlot) => {
+      definitionSlot.definitions.forEach((definition) => {
+        const gridDefinitionSlot =
+          grid[definitionSlot.coordinates.x][definitionSlot.coordinates.y];
+        console.log(gridDefinitionSlot);
 
-        if (gridLetter === undefined) {
-          grid[letterCoordinates.x][letterCoordinates.y] = slotLetter;
-        } else if (!slotLetter.equals(gridLetter)) {
+        if (gridDefinitionSlot !== undefined) {
           throw new Error(
-            `Incoherence in Grid letters in ${letterCoordinates} => ${gridLetter} !== ${slotLetter}`
+            `Grid Definition cannot be put in ${definitionSlot.coordinates}, there is ${gridDefinitionSlot} already`
           );
         }
+
+        grid[definitionSlot.coordinates.x][definitionSlot.coordinates.y] =
+          definitionSlot;
+
+        definition.definition.answer.split('').forEach((letter, i) => {
+          const letterCoordinates = definition.coordinateForIndex(
+            definitionSlot.coordinates,
+            i
+          );
+          this._validateCoordinates(letterCoordinates);
+          const gridLetter = grid[letterCoordinates.x][letterCoordinates.y];
+          const slotLetter = Slot.create(letter);
+
+          if (gridLetter === undefined) {
+            grid[letterCoordinates.x][letterCoordinates.y] = slotLetter;
+          } else if (
+            !(gridLetter instanceof Slot) ||
+            !slotLetter.equals(gridLetter)
+          ) {
+            throw new Error(
+              `Incoherence in Grid letters in ${letterCoordinates} => ${gridLetter} !== ${slotLetter}`
+            );
+          }
+        });
       });
     });
 
-    // TODO
-    // ici lettres cohérentes ==> reste à vérifier s'il y a pas de trou dans la grille
-    // vérifier s'il y'a pas une lettre sur une définition aussi !
-    // pas même coordinates pour =/= GridDefinitionsSlot
+    for (let x = 0; x < this.width; x++) {
+      for (let y = 0; y < this.height; y++) {
+        if (grid[x][y] === undefined) {
+          throw new Error(`Grid position (${x}, ${y}) is undefined`);
+        }
+      }
+    }
   }
 
   private _validateCoordinates(coordinates: Coordinates) {
     if (coordinates.x >= this.width || coordinates.y >= this.height) {
       throw new Error(
-        `Coordinates(${coordinates}) must be greater than ${this}`
+        `Coordinates(${coordinates}) must be within than ${this}`
       );
     }
   }
