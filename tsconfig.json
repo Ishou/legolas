@@ -4,10 +4,28 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/legolas-e2e"
+      "path": "./apps/web-e2e"
     },
     {
-      "path": "./apps/legolas"
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/api-e2e"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./libs/game/domain"
+    },
+    {
+      "path": "./libs/game/application"
+    },
+    {
+      "path": "./libs/game/infrastructure"
+    },
+    {
+      "path": "./libs/game/interface"
     }
   ]
 }
